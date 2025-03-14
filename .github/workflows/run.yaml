@@ -61,6 +61,10 @@ jobs:
     - name: Install Kurtosis
       uses: ./.github/actions/kurtosis-install
 
+    - name: Download Ethereum Package Config # TODO: move this to the config dockerfile
+      run: |
+        ./scripts/download-package-config.sh ${{ inputs.ethereum_package_config_file }} ethereum-package-config.yaml
+
     - name: Extract images for Antithesis # TODO: move this to the config dockerfile and save the output to a file
       id: extract_images
       run: |
