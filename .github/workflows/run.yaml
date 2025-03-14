@@ -29,7 +29,7 @@ on:
       config_image:
         description: 'Config image'
         required: true
-        default: skylenet/ethereum-package-config:main-8f8830f
+        default: docker.io/skylenet/ethereum-package-config:main-8f8830f
         type: string
       duration:
         description: 'Duration (exploration hours)'
