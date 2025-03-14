@@ -21,11 +21,11 @@ on:
       #  required: true
       #  default: 'main'
       #  type: string
-      #ethereum_package_config_file:
-      #  description: 'Ethereum package config file, either a local file or a URL'
-      #  required: true
-      #  default: 'tests/pectra.yaml'
-      #  type: string
+      ethereum_package_config_file:
+        description: 'Ethereum package config file URL'
+        required: true
+        default: 'https://gist.githubusercontent.com/skylenet/b6a15ce393a71a17c4b3e8f7ea614cef/raw/0c8597c5f989f3fca824dc1776aa10a897b329f5/gistfile1.txt'
+        type: string
       config_image:
         description: 'Config image'
         required: true

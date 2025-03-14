@@ -21,7 +21,7 @@ fi
 args_file="$1"
 
 # Run the command and capture its output
-output=$(kurtosis run github.com/ethpandaops/ethereum-package --args-file "$args_file" --dependencies)
+output=$(kurtosis run github.com/ethpandaops/ethereum-package --enclave tmp --args-file "$args_file" --dependencies)
 
 # Extract images based on format
 if [ "$format" = "semicolon" ]; then
