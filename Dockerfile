@@ -34,10 +34,10 @@ RUN for package in ${PACKAGE_LIST}; do \
 RUN echo "replace:" >> /ethereum-package/kurtosis.yml && \
     for package in ${PACKAGE_LIST}; do \
     package_name=$(basename $package); \
-    echo "  ${package}: /vendored-packages/${package_name}" >> /ethereum-package/kurtosis.yml; \
+    echo "  ${package}: ../vendored-packages/${package_name}" >> /ethereum-package/kurtosis.yml; \
     done
 
-FROM scratch
+FROM debian:stable-slim
 
 COPY --from=builder /ethereum-package /ethereum-package
 # Copy all dependency packages
