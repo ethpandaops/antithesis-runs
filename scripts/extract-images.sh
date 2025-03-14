@@ -37,7 +37,7 @@ if [ "$format" = "semicolon" ]; then
     if (length(parts) > 1) {
       print registry ":" parts[2]
     } else {
-      print registry
+      print registry ":latest"
     }
   }' | paste -sd ";"
 else
@@ -53,7 +53,7 @@ else
     if (length(parts) > 1) {
       print registry ":" parts[2]
     } else {
-      print registry
+      print registry ":latest"
     }
   }'
 fi
