@@ -9,38 +9,28 @@ on:
       test:
         description: 'Test name'
         required: false
-        default: ''
+        default: 'Kurtosis Ethereum Package'
         type: string
-      #ethereum_package_repo:
-      #  description: 'Ethereum package version'
-      #  required: true
-      #  default: 'https://github.com/ethpandaops/ethereum-package'
-      #  type: string
-      #ethereum_package_version:
-      #  description: 'Ethereum package version. Can be a branch, tag, or commit hash.'
-      #  required: true
-      #  default: 'main'
-      #  type: string
+      ethereum_package_repo:
+        description: 'Ethereum package version'
+        required: true
+        default: 'https://github.com/ethpandaops/ethereum-package'
+        type: string
+      ethereum_package_version:
+        description: 'Ethereum package version. Can be a branch, tag, or commit hash.'
+        required: true
+        default: 'main'
+        type: string
       ethereum_package_config_file:
         description: 'Ethereum package config file URL'
         required: true
-        default: 'https://gist.githubusercontent.com/skylenet/b6a15ce393a71a17c4b3e8f7ea614cef/raw/0c8597c5f989f3fca824dc1776aa10a897b329f5/gistfile1.txt'
-        type: string
-      config_image:
-        description: 'Config image'
-        required: true
-        default: docker.io/skylenet/ethereum-package-config:main-8f8830f
+        default: 'https://raw.githubusercontent.com/ethpandaops/ethereum-package/refs/heads/main/.github/tests/mix.yaml'
         type: string
       duration:
         description: 'Duration (exploration hours)'
         required: true
         type: number
         default: 1.0
-      #description:
-      #  description: 'Test run description (avoid quotes, please!)'
-      #  required: true
-      #  type: string
-      #  default: "No description provided"
       email:
         description: 'Additional email notification recipient (separate with ;)'
         required: true
@@ -58,18 +48,40 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Log in to the Container registry
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Install Kurtosis
       uses: ./.github/actions/kurtosis-install
 
-    - name: Download Ethereum Package Config # TODO: move this to the config dockerfile
-      run: |
-        ./scripts/download-package-config.sh ${{ inputs.ethereum_package_config_file }} ethereum-package-config.yaml
-
-    - name: Extract images for Antithesis # TODO: move this to the config dockerfile and save the output to a file
+    - name: Extract images for Antithesis
       id: extract_images
+      env:
+        ETHEREUM_PACKAGE_REPO: ${{ inputs.ethereum_package_repo }}
+        ETHEREUM_PACKAGE_VERSION: ${{ inputs.ethereum_package_version }}
+        CONFIG_FILE: ${{ inputs.ethereum_package_config_file }}
       run: |
-        echo "images=$(./scripts/extract-images.sh -f semicolon ethereum-package-config.yaml)" >> $GITHUB_OUTPUT
+        echo "images=$(make antithesis-images-list)" >> $GITHUB_OUTPUT
 
+    - name: Build config image
+      id: build_config_image
+      env:
+        ETHEREUM_PACKAGE_REPO: ${{ inputs.ethereum_package_repo }}
+        ETHEREUM_PACKAGE_VERSION: ${{ inputs.ethereum_package_version }}
+        CONFIG_FILE: ${{ inputs.ethereum_package_config_file }}
+        CONFIG_IMAGE_NAME: ghcr.io/ethpandaops/ethereum-package-config
+        CONFIG_IMAGE_TAG: ${{ github.run_id }}-${{ github.run_attempt }}
+      run: |
+        make config-image
+        echo "config_image=ghcr.io/ethpandaops/ethereum-package-config:${{ github.run_id }}-${{ github.run_attempt }}" >> $GITHUB_OUTPUT
+
+    - name: Push config image
+      run: |
+        docker push ${{ steps.build_config_image.outputs.config_image }}
 
     - name: Run Antithesis Tests
       uses: antithesishq/antithesis-trigger-action@main
@@ -79,11 +91,11 @@ jobs:
         username: ${{ secrets.ANTITHESIS_USERNAME }}
         password: ${{ secrets.ANTITHESIS_PASSWORD }}
         github_token: ${{ secrets.GH_PAT }}
-        config_image: ${{ inputs.config_image }} # TODO: replace this with an image that was built during the workflow run
+        config_image: ${{ steps.build_config_image.outputs.config_image }}
         images: ${{ steps.extract_images.outputs.images }}
         description: "${{ github.repository }} : ${{ github.workflow }} (Run #${{ github.run_id }} : ${{ github.run_attempt }})"
         email_recipients: ${{ inputs.email }}
-        test_name: ${{ inputs.test}}
+        test_name: ${{ inputs.test_name }}
         additional_parameters: |-
           custom.configuration=ethereum-package-config.yaml
           custom.duration = ${{ inputs.duration }}
