@@ -1,9 +1,6 @@
 name: Antithesis exploration
 
 on:
-  #push:
-  #  branches:
-  #    - init
   workflow_dispatch:
     inputs:
       test:
