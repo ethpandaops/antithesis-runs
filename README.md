@@ -2,7 +2,16 @@
 
 This repository builds config images for running Antithesis tests against the Ethereum Package using Kurtosis. The config image includes the Ethereum Package and all dependant kurtosis packages, and the container images it needs are extracted for the Antithesis runtime.
 
-There is no workflow that starts an Antithesis run. Build the config image locally (see Development) and start the run from Antithesis.
+There is no workflow that starts an Antithesis run. Build the config image, push it to `ghcr.io/ethpandaops/ethereum-package-config`, then start the run from Antithesis with that image:
+
+```bash
+export CONFIG_IMAGE_NAME=ghcr.io/ethpandaops/ethereum-package-config
+export CONFIG_IMAGE_TAG=$(date +%Y%m%d%H%M%S)
+make config-image
+docker push "$CONFIG_IMAGE_NAME:$CONFIG_IMAGE_TAG"
+```
+
+Pushing needs a `docker login ghcr.io` with `write:packages` on the ethpandaops org.
 
 ## Usage
 
