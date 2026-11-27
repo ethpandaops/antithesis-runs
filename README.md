@@ -1,31 +1,19 @@
 # Antithesis Ethereum Package Github Runs
 
-This repository contains GitHub Actions workflows for running Antithesis tests against the Ethereum Package using Kurtosis.
+This repository builds config images for running Antithesis tests against the Ethereum Package using Kurtosis. The config image includes the Ethereum Package and all dependant kurtosis packages, and the container images it needs are extracted for the Antithesis runtime.
 
-## Overview
+There is no workflow that starts an Antithesis run. Build the config image, push it to `ghcr.io/ethpandaops/ethereum-package-config`, then start the run from Antithesis with that image:
 
-The main workflow allows running Antithesis tests against different versions of the Ethereum Package with configurable parameters. It handles:
+```bash
+export CONFIG_IMAGE_NAME=ghcr.io/ethpandaops/ethereum-package-config
+export CONFIG_IMAGE_TAG=$(date +%Y%m%d%H%M%S)
+make config-image
+docker push "$CONFIG_IMAGE_NAME:$CONFIG_IMAGE_TAG"
+```
 
-- Building and pushing config images that include the Ethereum Package and all dependant kurtosis packages
-- Extracting required container images to be provided to the Antithesis runtime
-- Running Antithesis tests with specified parameters
-- Sending email notifications with results
+Pushing needs a `docker login ghcr.io` with `write:packages` on the ethpandaops org. `make antithesis-images-list` prints the container images to pass to Antithesis alongside the config image.
 
 ## Usage
-
-### Running Tests
-
-1. Go to the "Actions" tab in GitHub
-2. Select the "Antithesis exploration" workflow
-3. Click "Run workflow"
-4. Configure the following parameters:
-
-- **Test name** - Name for the test run (default: "Kurtosis Ethereum Package")
-- **Ethereum package repo** - Repository URL (default: ethpandaops/ethereum-package)
-- **Ethereum package version** - Branch, tag or commit hash (default: main)
-- **Ethereum package config file** - URL to config YAML (default: mix.yaml from main branch)
-- **Duration** - Test duration in hours (default: 1.0)
-- **Email** - Recipients for test results (separate multiple with semicolons)
 
 ### Cleanup
 
