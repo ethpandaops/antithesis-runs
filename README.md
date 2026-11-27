@@ -11,7 +11,7 @@ make config-image
 docker push "$CONFIG_IMAGE_NAME:$CONFIG_IMAGE_TAG"
 ```
 
-Pushing needs a `docker login ghcr.io` with `write:packages` on the ethpandaops org.
+Pushing needs a `docker login ghcr.io` with `write:packages` on the ethpandaops org. `make antithesis-images-list` prints the container images to pass to Antithesis alongside the config image.
 
 ## Usage
 
